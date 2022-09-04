@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from .models import Question
+from .forms import QuestionForm
 
 
 def index(request):
@@ -25,3 +26,17 @@ def answer_create(request, question_id):
     question.answer_set.create(
         subject=subject, content=content, create_date=create_date)
     return redirect('board:detail', question_id=question.id)
+
+
+def question_create(request):
+    if request.method == 'POST':
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.create_date = timezone.now()
+            question.save()
+            return redirect('board:index')
+    else:
+        form = QuestionForm()
+    context = {'form': form}
+    return render(request, 'board/question_form.html', context)
