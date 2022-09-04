@@ -31,6 +31,20 @@
     <!-- 답변 등록 -->
     <form action="{% url 'board:answer_create' question.id %}" method="post" class="my-3">
         {% csrf_token %}
+        <!-- 오류표시 Start -->
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            {% for field in form %}
+            {% if field.errors %}
+            <div>
+                <strong>{{ field.label }}</strong>
+                {{ field.errors }}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <!-- 오류표시 End -->
          <div class="mb-3">
             <label for="subject" class="form-label">답변 제목</label>
             <textarea name="subject" id="subject" class="form-control" rows="1"></textarea>
