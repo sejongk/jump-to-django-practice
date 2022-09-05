@@ -1,9 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.http import HttpResponseNotAllowed
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+
 from .models import Question, Answer
 from .forms import QuestionForm, AnswerForm
-from django.core.paginator import Paginator
 
 
 def index(request):
@@ -22,14 +24,16 @@ def detail(request, question_id):
     return render(request, 'board/question_detail.html', context)
 
 
+@login_required(login_url='common:login')
 def answer_create(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
 
     if request.method == "POST":
         form = AnswerForm(request.POST)
         if form.is_valid():
-            # Answer 인스턴스로 받아서 수정 및 검증하도록 변경
+            # TODO: Answer 인스턴스로 받아서 수정 및 검증하도록 변경
             answer = form.save(commit=False)
+            answer.author = request.user
             answer.create_date = timezone.now()
             answer.question = question
             answer.save()
@@ -41,12 +45,14 @@ def answer_create(request, question_id):
     return render(request, 'board/question_detail.html', context)
 
 
+@login_required(login_url='common:login')
 def question_create(request):
     if request.method == 'POST':
         form = QuestionForm(request.POST)
         if form.is_valid():
-            # Question 인스턴스로 받아서 수정 및 검증하도록 변경
+            # TODO: Question 인스턴스로 받아서 수정 및 검증하도록 변경
             question = form.save(commit=False)
+            question.author = request.user
             question.create_date = timezone.now()
             question.save()
             return redirect('board:index')
